@@ -8,29 +8,31 @@ using Microsoft.Extensions.Logging;
 using ACADEMY_864129_WebApp.Models;
 using Newtonsoft.Json;
 using System.Net.Http;
+using ACADEMY_864129_WebApp.Services;
+using Microsoft.Extensions.Options;
 
 namespace ACADEMY_864129_WebApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IBigStore bigStoreService;
+        private readonly AppSettings appSettings;
+        public HomeController(ILogger<HomeController> logger, IBigStore bigStoreService, IOptions<AppSettings> appSettings)
         {
             _logger = logger;
+            this.bigStoreService = bigStoreService;
+            this.appSettings = appSettings.Value;
         }
 
         public async Task<IActionResult> Index()
-        {
-            List<DeviceData> deviceDataList = new List<DeviceData>();
-            using (var httpClient = new HttpClient())
+        {            
+            MasterData deviceDataList = new MasterData
             {
-                using (var response = await httpClient.GetAsync("https://localhost:44383/api/Device/GetTelemetryDataTable"))
-                {
-                    string apiResponse = await response.Content.ReadAsStringAsync();
-                    deviceDataList = JsonConvert.DeserializeObject<List<DeviceData>>(apiResponse);
-                }
-            }
+                AzureTableAlertData = await bigStoreService.GetAlertData(),
+                AzureTableTelemetryData = await bigStoreService.GetTelemetryData(),
+                AzureCosmosDBTelemetryData = await bigStoreService.GetCosmosTelemetryData()
+            };
             return View(deviceDataList);
         }
 

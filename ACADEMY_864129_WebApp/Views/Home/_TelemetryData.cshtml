@@ -1,5 +1,4 @@
-﻿@model IEnumerable<DeviceData>
-@*
+﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -8,3 +7,63 @@
 <div class="text-center">
     <h4>Azure Table - Telemetry Data</h4>
 </div>
+
+<div id="chart_divTelemetry"></div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(LoadDataTelemetry);
+
+    function LoadDataTelemetry() {
+        $.ajax({
+            url: '@Url.Action("GetTelemetryData", "Home")',
+            dataType: "json",
+            type: "GET",
+            error: function(xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                toastr.error(err.message);
+            },
+            success: function(data) {
+                PopulationChartTelemetry(data);
+                return false;
+            }
+        });
+        return false;
+    }
+
+    function PopulationChartTelemetry(data) {
+        var dataArrayTelemetry = [
+            ['Temperature', 'Month','Humidity','DoorStatus']
+        ];
+        $.each(data, function (i, item) {
+            var status = 0;
+            if (item.doorstatus == true)
+            {
+                status = 1;
+            }
+            dataArrayTelemetry.push([parseInt(item.temperature), parseInt(item.month), parseInt(item.month), status]);
+        });
+        var dataTelemetry= google.visualization.arrayToDataTable(dataArrayTelemetry);
+        var options = {
+            title: 'Alert Data of the IoT Hub',
+            chartArea: {
+                width: '75%',
+                height: '100%'
+            },
+            colors: ['#b0120a', '#7b1fa2'],
+            hAxis: {
+                title: 'Temperature',
+                minValue: -20
+            },
+            vAxis: {
+                title: 'Months',
+                minValue:1
+            }
+        };
+        var telemetryChart = new google.visualization.ColumnChart(document.getElementById('chart_divTelemetry'));
+        telemetryChart.draw(dataTelemetry, options);
+        return false;
+    }
+</script> 

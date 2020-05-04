@@ -1,5 +1,4 @@
-﻿@model IEnumerable<DeviceData>
-@*
+﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -8,3 +7,59 @@
 <div class="text-center">
     <h4>Azure CosmosDb - Telemetry Data</h4>
 </div>
+
+<div id="chart_divCosmosTelemetry"></div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(LoadDataCosmos);
+
+    function LoadDataCosmos() {
+        $.ajax({
+            url: '@Url.Action("GetCosmosTelemetryData", "Home")',
+            dataType: "json",
+            type: "GET",
+            error: function(xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                toastr.error(err.message);
+            },
+            success: function(data) {
+                PopulationChartCosmos(data);
+                return false;
+            }
+        });
+        return false;
+    }
+
+    function PopulationChartCosmos(data) {
+        var dataArray = [
+            ['Month', 'Temperature']
+        ];
+        $.each(data, function (i, item) {            
+            dataArray.push([parseInt(item.month), parseInt(item.temperature)]);
+        });
+        var data = google.visualization.arrayToDataTable(dataArray);
+        var options = {
+            title: 'Telemetry Data of the IoT Hub from Cosmos DB',
+            chartArea: {
+                width: '75%',
+                height: '100%'
+            },
+            colors: ['#b0120a', '#7b1fa2'],
+            hAxis: {
+                title: 'Months',
+                minValue: 1
+            },
+            vAxis: {
+                title: 'Temperature',
+                minValue:-20
+            }
+        };
+        var chart = new google.visualization.LineChart(document.getElementById('chart_divCosmosTelemetry'));
+
+        chart.draw(data, options);
+        return false;
+    }
+</script> 

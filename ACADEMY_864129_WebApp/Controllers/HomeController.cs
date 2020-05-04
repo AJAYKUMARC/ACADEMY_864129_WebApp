@@ -25,15 +25,27 @@ namespace ACADEMY_864129_WebApp.Controllers
             this.appSettings = appSettings.Value;
         }
 
-        public async Task<IActionResult> Index()
-        {            
-            MasterData deviceDataList = new MasterData
-            {
-                AzureTableAlertData = await bigStoreService.GetAlertData(),
-                AzureTableTelemetryData = await bigStoreService.GetTelemetryData(),
-                AzureCosmosDBTelemetryData = await bigStoreService.GetCosmosTelemetryData()
-            };
-            return View(deviceDataList);
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public async Task<JsonResult> GetAlertData()
+        {
+            var azureTableAlertData = await bigStoreService.GetAlertData();
+            return Json(azureTableAlertData);
+        }
+
+        public async Task<JsonResult> GetTelemetryData()
+        {
+            var azureTableAlertData = await bigStoreService.GetTelemetryData();
+            return Json(azureTableAlertData);
+        }
+
+        public async Task<JsonResult> GetCosmosTelemetryData()
+        {
+            var azureTableAlertData = await bigStoreService.GetCosmosTelemetryData();
+            return Json(azureTableAlertData);
         }
 
         public IActionResult ViewDevices()

@@ -1,9 +1,63 @@
-﻿@model IEnumerable<DeviceData>
-@*
+﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
 }
-    <div class="text-center">
-        <h4>Azure Table - Alert Data</h4>        
-    </div>
+<div class="text-center">
+    <h4>Azure Table - Alert Data</h4>
+</div>
+
+<div id="chart_divAlert"></div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(LoadDataAlert);
+
+    function LoadDataAlert() {
+        $.ajax({
+            url: '@Url.Action("GetAlertData", "Home")',
+            dataType: "json",
+            type: "GET",
+            error: function(xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                toastr.error(err.message);
+            },
+            success: function(data) {
+                PopulationChartAlert(data);
+                return false;
+            }
+        });
+        return false;
+    }
+
+    function PopulationChartAlert(data) {
+        var dataArrayAlert = [
+            ['Temperature', 'Month']
+        ];
+        $.each(data, function (i, item) {                      
+            dataArrayAlert.push([parseInt(item.temperature), parseInt(item.month)]);
+        });
+        var dataAlert = google.visualization.arrayToDataTable(dataArrayAlert);
+        var options = {
+            title: 'Alert Data of the IoT Hub',
+            chartArea: {
+                width: '75%',
+                height:'100%'
+            },
+            colors: ['#b0120a', '#7b1fa2'],
+            hAxis: {
+                title: 'Temperature',
+                minValue: -20
+            },
+            vAxis: {
+                title: 'Months',
+                minValue:1
+            }
+        };
+        var alertChart = new google.visualization.ColumnChart(document.getElementById('chart_divAlert'));
+        alertChart.draw(dataAlert, options);
+        return false;
+    }
+</script> 

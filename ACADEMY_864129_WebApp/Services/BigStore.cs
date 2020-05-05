@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ACADEMY_864129_WebApp.Services
@@ -39,6 +40,19 @@ namespace ACADEMY_864129_WebApp.Services
              DoorStatus = g.Key.DoorStatus,
              Humidity = g.Key.Humidity
          }).OrderByDescending(a => a.Month).ToList();
+                }
+            }
+            return deviceDataList;
+        }
+        public async Task<IList<DeviceInfo>> GetConnectedDevices()
+        {
+            var deviceDataList = new List<DeviceInfo>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(appSettings.BigStoreAPI + "GetConfigInfo"))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    deviceDataList = JsonConvert.DeserializeObject<List<DeviceInfo>>(apiResponse);
                 }
             }
             return deviceDataList;
@@ -96,6 +110,19 @@ namespace ACADEMY_864129_WebApp.Services
                 }
             }
             return deviceDataList;
+        }
+
+        public async Task PostMessageToIoTHub(DeviceData deviceData)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var deviceJSON = JsonConvert.SerializeObject(deviceData);
+                var data = new StringContent(deviceJSON, Encoding.UTF8, "application/json");
+                using (var response = await httpClient.PostAsync(appSettings.BigStoreAPI + "MessageToDevice", data))
+                {
+                    string result = await response.Content.ReadAsStringAsync();
+                }
+            }            
         }
     }
 }

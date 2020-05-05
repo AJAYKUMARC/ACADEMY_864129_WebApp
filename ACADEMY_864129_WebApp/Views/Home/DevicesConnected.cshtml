@@ -3,3 +3,19 @@
 *@
 @{
 }
+
+@model IEnumerable<DeviceInfo>;
+
+<div class="text-center">
+    <h5 class="display-4">Device Information</h5>   
+</div>
+<div class="clearfix" style="min-height:50px"></div>
+<div class="col-6">
+    @foreach (var item in Model)
+    {
+        <ul class="list-group">
+            <li class="list-group-item active" style="color: #131111; background-color: #dee2e6; border-color: #dee2e6;">Device Id : @item.DeviceId</li>
+            <li class="list-group-item">Device Status : @item.IoTDeviceStatus</li>
+        </ul>
+    }
+</div>

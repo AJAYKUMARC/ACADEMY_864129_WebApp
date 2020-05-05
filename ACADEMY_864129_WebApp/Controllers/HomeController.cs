@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using ACADEMY_864129_WebApp.Services;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.WindowsAzure.Storage.Blob.Protocol;
 
 namespace ACADEMY_864129_WebApp.Controllers
 {
@@ -48,14 +50,40 @@ namespace ACADEMY_864129_WebApp.Controllers
             return Json(azureTableAlertData);
         }
 
-        public IActionResult ViewDevices()
+        public async Task<IActionResult> ViewDevicesAsync()
         {
-            return View("DevicesConnected");
+            IList<DeviceInfo> deviceData = await bigStoreService.GetConnectedDevices();
+            return View("DevicesConnected", deviceData);
         }
 
-        public IActionResult ViewConfigurations()
+        public async Task<IActionResult> ViewConfigurationsAsync()
         {
+            IList<DeviceInfo> deviceData = await bigStoreService.GetConnectedDevices();
+            var selectedListItems = new List<SelectListItem>();
+            foreach (var item in deviceData)
+            {
+                selectedListItems.Add(new SelectListItem { Text = item.DeviceId, Value = item.DeviceId });
+            }
+            ViewBag.Data = new SelectList(selectedListItems, "Value", "Text");
+            if (TempData.ContainsKey("AlertCheck"))
+            {
+                ViewBag.Alert = true;
+                TempData.Remove("Alert");
+            }
+            else 
+            {
+                ViewBag.Alert = false;
+            }
+
             return View("ViewConfigurations");
         }
+
+        public async Task<IActionResult> SendData(DeviceData deviceData)
+        {
+            await bigStoreService.PostMessageToIoTHub(deviceData);
+            TempData["AlertCheck"] = true;
+            return RedirectToAction("ViewConfigurations");
+        }
+
     }
 }

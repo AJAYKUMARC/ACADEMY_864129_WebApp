@@ -11,5 +11,7 @@ namespace ACADEMY_864129_WebApp.Services
         Task<IList<DeviceData>> GetAlertData();
         Task<IList<DeviceData>> GetTelemetryData();
         Task<IList<DeviceData>> GetCosmosTelemetryData();
+        Task<IList<DeviceInfo>> GetConnectedDevices();
+        Task PostMessageToIoTHub(DeviceData deviceData);
     }
 }

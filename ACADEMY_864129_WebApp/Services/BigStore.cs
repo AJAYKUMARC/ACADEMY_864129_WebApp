@@ -95,7 +95,7 @@ namespace ACADEMY_864129_WebApp.Services
                     deviceDataList = JsonConvert.DeserializeObject<List<DeviceData>>(apiResponse);
                     deviceDataList = deviceDataList.GroupBy(o => new DeviceData
                     {
-                        Month = Convert.ToDateTime(o.RowKey).Month,
+                        Month = o.Timestamp.Month,
                         Temperature = o.Temperature,
                         DoorStatus = o.DoorStatus,
                         Humidity = o.Humidity
